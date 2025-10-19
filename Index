@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Countdown do Power</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+      color: #fff;
+    }
+    body {
+      background: radial-gradient(circle at top, #1b1b2f, #16213e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px 50px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    .info {
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+    }
+    .countdown {
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+    .footer {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="powerName">Carregando...</h1>
+    <div class="info" id="powerInfo"></div>
+    <div class="countdown" id="countdown">--:--:--</div>
+  </div>
+
+  <div class="footer">
+    Feito por Lucas Viana 💻 | API: xatblog.net
+  </div>
+
+  <script>
+    async function carregarPower() {
+      try {
+        const res = await fetch("https://api.xatblog.net/countdown");
+        const data = await res.json();
+
+        const { name, id, type, timestamp } = data;
+        const powerName = document.getElementById("powerName");
+        const powerInfo = document.getElementById("powerInfo");
+        const countdown = document.getElementById("countdown");
+
+        powerName.textContent = `Power: ${name}`;
+        powerInfo.textContent = `Tipo: ${type} | ID: ${id}`;
+
+        function atualizarTimer() {
+          const agora = Math.floor(Date.now() / 1000);
+          let restante = timestamp - agora;
+
+          if (restante < 0) {
+            countdown.textContent = "🔓 Lançado!";
+            return;
+          }
+
+          const horas = Math.floor(restante / 3600);
+          const minutos = Math.floor((restante % 3600) / 60);
+          const segundos = restante % 60;
+
+          countdown.textContent =
+            `${horas.toString().padStart(2, "0")}:` +
+            `${minutos.toString().padStart(2, "0")}:` +
+            `${segundos.toString().padStart(2, "0")}`;
+        }
+
+        atualizarTimer();
+        setInterval(atualizarTimer, 1000);
+      } catch (err) {
+        document.getElementById("powerName").textContent = "Erro ao carregar dados 😕";
+        console.error(err);
+      }
+    }
+
+    carregarPower();
+  </script>
+</body>
+</html>
