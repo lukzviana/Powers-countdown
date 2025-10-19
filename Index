@@ -26,6 +26,7 @@
       padding: 30px 50px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       max-width: 400px;
+      transition: transform 0.3s ease;
     }
     h1 {
       font-size: 1.8rem;
@@ -34,11 +35,17 @@
     .info {
       margin-bottom: 20px;
       font-size: 1.1rem;
+      opacity: 0.9;
     }
     .countdown {
       font-size: 2rem;
       font-weight: bold;
       letter-spacing: 2px;
+      animation: fade 0.5s ease-in-out;
+    }
+    @keyframes fade {
+      from { opacity: 0.3; }
+      to { opacity: 1; }
     }
     .footer {
       margin-top: 20px;
@@ -48,7 +55,7 @@
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card" id="card">
     <h1 id="powerName">Carregando...</h1>
     <div class="info" id="powerInfo"></div>
     <div class="countdown" id="countdown">--:--:--</div>
@@ -64,20 +71,21 @@
         const res = await fetch("https://api.xatblog.net/countdown");
         const data = await res.json();
 
-        const { name, id, type, timestamp } = data;
+        const { name, id, type, remaining } = data;
         const powerName = document.getElementById("powerName");
         const powerInfo = document.getElementById("powerInfo");
         const countdown = document.getElementById("countdown");
+        const card = document.getElementById("card");
 
         powerName.textContent = `Power: ${name}`;
         powerInfo.textContent = `Tipo: ${type} | ID: ${id}`;
 
-        function atualizarTimer() {
-          const agora = Math.floor(Date.now() / 1000);
-          let restante = timestamp - agora;
+        let restante = remaining;
 
-          if (restante < 0) {
+        function atualizarTimer() {
+          if (restante <= 0) {
             countdown.textContent = "🔓 Lançado!";
+            card.style.transform = "scale(1.05)";
             return;
           }
 
@@ -89,10 +97,16 @@
             `${horas.toString().padStart(2, "0")}:` +
             `${minutos.toString().padStart(2, "0")}:` +
             `${segundos.toString().padStart(2, "0")}`;
+
+          restante--;
+          countdown.style.animation = "none";
+          void countdown.offsetWidth; // reinicia animação
+          countdown.style.animation = "fade 0.5s ease-in-out";
         }
 
         atualizarTimer();
         setInterval(atualizarTimer, 1000);
+
       } catch (err) {
         document.getElementById("powerName").textContent = "Erro ao carregar dados 😕";
         console.error(err);
